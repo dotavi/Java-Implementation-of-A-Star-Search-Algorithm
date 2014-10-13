@@ -14,26 +14,31 @@
 package astarassignment;
  
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import astarassignment.CreateGraph;
+import astarassignment.CreateNodeGraph.Node;
 
 
 public class ReadInTextFile {
 	private static int WIDTH;
 	private static  int HEIGHT;
 	
-	//public static double mapmatrix[][];	
+	public static List<Node> routez;
+	public static String mapfilepath;
+	public static double mapmatrix[][];	
 	
 	//This method performs string manipulation on the next input line from the Scanner
 	private static List<Character> createRow(String line) {
@@ -51,43 +56,88 @@ public class ReadInTextFile {
 	
 	public ReadInTextFile() {
 		//Opens a dialog to choose the text file to be entered as a terrain map
-		double mapmatrix[][] = null;	
 		List<List<Character>> gamemap = new ArrayList<List<Character>>();
 		JFileChooser fileChooser = new JFileChooser();
 
 		if ( fileChooser.showOpenDialog (null) == JFileChooser.APPROVE_OPTION) {
-			java.io.File file = fileChooser.getSelectedFile(); // Get the selected file
+		 java.io.File file = fileChooser.getSelectedFile(); // Get the selected file
+		 mapfilepath = file.getAbsolutePath();
 			try (Scanner s = new Scanner(new BufferedReader(new FileReader(file)))) {
 				while(s.hasNextLine()) {
 					gamemap.add(createRow(s.nextLine()));
-					}																	
+									
+				}																	
 					System.out.println(gamemap);
 			} catch (FileNotFoundException e) 	{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			}
 		}
-
+		
+		mapmatrix = new double[gamemap.size()][gamemap.size()];
 		for (int i=0; i <gamemap.size() ; i++) {
 			List<Character> sr = gamemap.get(i);
-			mapmatrix = new double[gamemap.size()][sr.size()];
-			WIDTH = gamemap.size();
-			HEIGHT = sr.size();
+			WIDTH = gamemap.size()-1;		//-1 to reference the correct destination!!
+			HEIGHT = sr.size()-1;
 			for (int j=0; j< sr.size(); j++) {
 				mapmatrix[i][j] = Double.valueOf(String.valueOf(sr.get(j)));
-				System.out.print(mapmatrix[i][j]);
 			}
 		} 
-
-		CreateGraph terrainmap = new CreateGraph(mapmatrix);
-		System.out.println(terrainmap.findPath(0, 0, WIDTH, HEIGHT));
 		
-		JOptionPane.showMessageDialog(null, terrainmap.findPath(0, 0, WIDTH, HEIGHT));
-	
-	}
+		CreateNodeGraph terrainmap = new CreateNodeGraph(mapmatrix);
+		routez  = terrainmap.findPath(0, 0, WIDTH, HEIGHT);		
+		System.out.println(routez);	
+		
+		}
+		
 
 public static void main(String[] args) {
 	new ReadInTextFile();
+	WriteTextFile();
 	}
- 
+
+private static void WriteTextFile() {
+	List<String> finalmap = new ArrayList<String>();
+	try (Scanner s = new Scanner(new BufferedReader(new FileReader(mapfilepath)))) {
+		while(s.hasNextLine()) {
+		
+							finalmap.add(s.nextLine());
+		}																	
+			System.out.println("finalmap "+finalmap);
+	} catch (FileNotFoundException e) 	{
+	// TODO Auto-generated catch block
+	e.printStackTrace();
+	}
+	
+	for (Node n: routez) {
+		
+		int curx = n.getX();
+		int cury = n.getY();	
+		String S1 = finalmap.get(curx);
+		char[] c = S1.toCharArray();
+		c[cury] = '#';
+		
+		System.out.println(c);
+		
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File("TheRoute.txt"), true));
+			StringBuffer sb = new StringBuffer();
+			sb.append(c);
+			bw.newLine();
+			bw.write(sb.toString());
+			bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+		
+		
+	}
+	
+
+
+
+}
 }

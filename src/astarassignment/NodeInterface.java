@@ -9,11 +9,11 @@ public interface NodeInterface<N> {
 	//Calc the Manhattan Distance from the current 
 	double calcHeuristic(N goal);
 
-	double traversalCost(N neighbour);
+	double traversCost(N neighbour);
 	
 	//This method creates a list of the neighbours of the current node being examined. Tests are performed to remove the diagonal neighbours, 
 	//as these are not relevant for this implementation 
-	Set<N> getNeighbours();
+	Set<N> getNeighbors();
 
 
 }

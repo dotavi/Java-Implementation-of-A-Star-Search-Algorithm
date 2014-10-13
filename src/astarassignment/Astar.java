@@ -15,56 +15,53 @@ public class Astar {
 //start is the starting node, goal is the end node
 	
 public static <N extends NodeInterface<N>> List<N> aStarSearch(N start, N goal) {
-	Set<N> closed = new HashSet<N>();		//create the closed list of nodes, initially empty 
-	Map<N, N> fromMap = new HashMap<N, N>();
+	Set<N> closedlist = new HashSet<N>();		//create the closed list of nodes, initially empty 
+	Map<N, N> pathmap = new HashMap<N, N>();
 	List<N> route = new LinkedList<N>();
 	
-	Map<N, Double> gValue = new HashMap<N, Double>();
-	final Map<N, Double> fValue = new HashMap<N, Double>();
+	Map<N, Double> gVal = new HashMap<N, Double>();
+	final Map<N, Double> fVal = new HashMap<N, Double>();
 	
-	PriorityQueue<N> open = new PriorityQueue<N>(11, new Comparator<N>() {
+	PriorityQueue<N> openlist = new PriorityQueue<N>(11, new Comparator<N>() {
  		public int compare(N nodeA, N nodeB) {
-			return Double.compare(fValue.get(nodeA), fValue.get(nodeB));
+			return Double.compare(fVal.get(nodeA), fVal.get(nodeB));
 		}
 	});
  
-	gValue.put(start, 0.0);
-	fValue.put(start, start.calcHeuristic(goal));
-	open.offer(start);
+	gVal.put(start, 0.0);
+	fVal.put(start, start.calcHeuristic(goal));
+	openlist.offer(start);
  
-	while (!open.isEmpty()) {			
-		N current = open.poll();
+	while (!openlist.isEmpty()) {			
+		N current = openlist.poll();
 		if (current.equals(goal)) {
 			while (current != null) {
 				route.add(0, current);
-				current = fromMap.get(current);
-				System.out.println("Route" + current);
+				current = pathmap.get(current);
 			}
 			return route;			//Return if goal state is reached
 		}
  
-		closed.add(current);		//Remove node with smallest evaluation function and mark closed
+		closedlist.add(current);		//Remove node with smallest evaluation function and mark closed
 		
-		System.out.println("Route" + current);
-		
-		for (N neighbour : current.getNeighbours()) {		
-			if (closed.contains(neighbour)) {			//If closed contains already visited node, ignore
+		for (N neighbor : current.getNeighbors()) {		
+			if (closedlist.contains(neighbor)) {			//If closed contains already visited node, ignore
 				continue;
 			}
  
-			double gDash = gValue.get(current) + current.traversalCost(neighbour);
+			double gDash = gVal.get(current) + current.traversCost(neighbor);
  
-			boolean contains = open.contains(neighbour);
-			if (!contains || gDash < gValue.get(neighbour)) {
-				gValue.put(neighbour, gDash);
-				fValue.put(neighbour, gDash + neighbour.calcHeuristic(goal));
+			boolean contains = openlist.contains(neighbor);
+			if (!contains || gDash < gVal.get(neighbor)) {
+				gVal.put(neighbor, gDash);
+				fVal.put(neighbor, gDash + neighbor.calcHeuristic(goal));
  
 				if (contains) {
-					open.remove(neighbour);
+					openlist.remove(neighbor);
 				}
  
-				open.offer(neighbour);
-				fromMap.put(neighbour, current);
+				openlist.offer(neighbor);
+				pathmap.put(neighbor, current);
 				
 				}
 			}
